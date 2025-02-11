@@ -1,0 +1,18 @@
+[Unit]
+Description=Software de gerenciamento de arquivos em multiplos computadores na rede local
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/fileserver
+Restart=always
+User=nobody
+Group=nogroup
+WorkingDirectory=/etc/fileserver
+Environment="GO_ENV=production"
+
+StandardOutput=/var/log/fileserver/output.log
+StandardError=/var/log/fileserver/output.log
+
+[Install]
+WantedBy=multi-user.target
