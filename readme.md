@@ -4,16 +4,19 @@ Manual
 Aqueduct é um servidor de transferência de arquivos para plataformas linux construído em GOLANG via rede local com compartilhamento para dispositivos desktops na rede. 
 
 # Inicio
-No terminal digite, navegue até a raiz do projeto e digite: 
+ 
+Clone os arquivos na pasta build
+No terminal, garanta que o script de instação tenha permissões de execução
+Após isso, navegue até a raiz do projeto e digite: 
 
-$ $ sudo ./aqueduct
+$ sudo ./install.sh
 
 # Configuração 
-Realize as configurações necessárias no arquivo de configurações criado ao executar o arquivo de instalação.
+Realize as configurações no arquivo config.env.
 
-Para ver o caminho do arquivo de configuração digite no terminal:
+Para ver o caminho do arquivo de configuração, execute o script de instalação e digite no terminal:
 
-$ $ aqueduct --config 
+$ aqueduct 
 
 # Contribuir 
 Ler a nota extra.md para mais informações.
