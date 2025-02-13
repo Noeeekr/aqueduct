@@ -2,7 +2,6 @@ package main
 
 import (
 	"archive/zip"
-	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -65,7 +64,6 @@ func ServeTemplate(ctx *gin.Context) {
 		dir_path := path.Join(_path, dir.Name())
 
 		if (*cookie)[path.Join(files_root, dir_path)] {
-			fmt.Println(path.Join(files_root, dir_path))
 			del_btn_path = dir_path
 		}
 
@@ -126,7 +124,7 @@ func HandleUpload(ctx *gin.Context) {
 					file_path := path.Join(_path, strings.Trim(field[1], `"`))
 
 					// Check if filepath is .. or any kind of troll/../../../..
-					if !isValidPath(file_path) {
+					if !isSecurePath(file_path) {
 						ctx.JSON(http.StatusInternalServerError, gin.H{"success": false, "message": "O arquivo " + file_path + " é um risco de segurança."})
 						return
 					}
@@ -220,6 +218,23 @@ func HandleUpload(ctx *gin.Context) {
 }
 
 func HandleDelete(ctx *gin.Context) {
+	relative_path, err := getRelativePath(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusCreated, gin.H{"success": false, "message": "Caminho relativo não especificado"})
+		return
+	}
+
+	LogInfo(relative_path)
+
+	root_path := GetConfig("path")
+	absolute_path := path.Join(root_path, relative_path)
+
+	LogInfo(root_path)
+	LogInfo(absolute_path)
+
+	if err := os.RemoveAll(absolute_path); err != nil {
+		ctx.JSON(http.StatusCreated, gin.H{"success": true, "message": "Falha ao deletar a pasta. Error:" + err.Error()})
+	}
 
 	ctx.JSON(http.StatusCreated, gin.H{"success": true, "message": ""})
 }
@@ -228,15 +243,15 @@ func HandleDelete(ctx *gin.Context) {
 func getRelativePath(ctx *gin.Context) (path string, err error) {
 	_path := ctx.Request.URL.Query().Get("path")
 
-	if !isValidPath(_path) {
+	if !isSecurePath(_path) {
 		return "/", errors.New(" Caminho de arquivo inválido")
 	}
 
 	return _path, nil
 }
 
-// Check if the path contains any form of ../ | /.. | ..
-func isValidPath(_path string) bool {
+// Check if the path contains "../" or "/.."
+func isSecurePath(_path string) bool {
 	if _path == "" {
 		return false
 	}
@@ -245,7 +260,7 @@ func isValidPath(_path string) bool {
 		return false
 	}
 
-	if strings.Contains(_path, "/..") || strings.HasPrefix(_path, "..") || strings.Contains(_path, "../") {
+	if strings.Contains(_path, "../") || strings.HasPrefix(_path, "..") || strings.Contains(_path, "/..") {
 		return false
 	}
 
@@ -309,43 +324,36 @@ func parseSessionCookie(ctx *gin.Context) *map[string]bool {
 }
 
 func HandleDownload(ctx *gin.Context) {
-	folder_name := ctx.Param("folders")
-	if folder_name == "" {
-		ctx.JSON(http.StatusCreated, gin.H{"success": true, "message": "Nome da pasta não especificado"})
-	}
-
 	relative_path, err := getRelativePath(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusCreated, gin.H{"success": false, "message": "Caminho relativo não especificado"})
+		return
 	}
 
 	root_path := GetConfig("path")
+	relative_path, folder_name := path.Split(relative_path)
+	absolute_path := path.Join(root_path, relative_path)
 
-	buffer, err := zipFolder(fmt.Sprintf("%s/%s", path.Join(root_path, relative_path), folder_name))
-	if err != nil {
-		ctx.JSON(http.StatusCreated, gin.H{"success": false, "message": "Falha ao processar o arquivo .zip"})
-	}
+	zipFolder(
+		ctx,
+		fmt.Sprintf("%s/%s", absolute_path, folder_name),
+	)
 
 	ctx.Header("Content-Type", "application/zip")
 	ctx.Header("Content-Disposition", fmt.Sprintf("attachment; filename=%s.zip", folder_name))
-	ctx.Data(200, "application/zip", buffer.Bytes())
-
 }
 
-func zipFolder(folder_path string) (*bytes.Buffer, error) {
-	// Creates a buffer to hold file bytes
-	buff := new(bytes.Buffer)
-
+func zipFolder(ctx *gin.Context, folder_path string) error {
 	// Creates a writer to write to buffer
-	zipWriter := zip.NewWriter(buff)
+	zipWriter := zip.NewWriter(ctx.Writer)
 
 	// Go through all files in folder
-	err := filepath.Walk(folder_path, func(path string, info fs.FileInfo, err error) error {
+	err := filepath.WalkDir(folder_path, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
 		}
 
@@ -363,18 +371,13 @@ func zipFolder(folder_path string) (*bytes.Buffer, error) {
 		}
 
 		_, err = io.Copy(zipFile, file)
+
 		return err
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	err = zipWriter.Close()
-
-	if err != nil {
-		return nil, err
-	}
-
-	return buff, nil
+	return zipWriter.Close()
 }

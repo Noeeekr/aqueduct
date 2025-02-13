@@ -1,0 +1,18 @@
+[Unit]
+Description=Software de compartilhamento de arquivos em multiplos computadores na rede local
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/aqueduct
+Restart=always
+User=root
+Group=root
+WorkingDirectory=/etc/aqueduct
+EnvironmentFile=/etc/aqueduct/config.env
+
+StandardOutput=/var/log/aqueduct/output.log
+StandardError=/var/log/aqueduct/output.log
+
+[Install]
+WantedBy=multi-user.target

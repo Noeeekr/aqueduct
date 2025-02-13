@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
+	"os/signal"
+	"syscall"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,21 +13,40 @@ import (
 const project_name = "aqueduct"
 
 var root = fmt.Sprintf("/etc/%s", project_name)
-var config_root = fmt.Sprintf("%s/config.conf", root)
 var template_root = fmt.Sprintf("%s/public/templates", root)
 var assets_root = fmt.Sprintf("%s/public/assets", root)
 
 func main() {
-	setup()
+	dev_mode := flag.Bool("dev", false, "Sets the program to development mode, disabling help messages and proceding without env")
+
+	flag.Parse()
+
+	// Listen for sigterm signals | finishes program if finds one
+	sig := make(chan os.Signal, 1)
+
+	signal.Notify(sig, syscall.SIGTERM)
+
+	go func() {
+		<-sig
+
+		os.Exit(1)
+	}()
+
+	if os.Getenv("GIN_MODE") != "release" {
+		if !*dev_mode {
+			fmt.Printf("-- Local do arquivo de configurações: %s\n", root)
+			fmt.Printf("-- Para parar o programa (caso esteja funcionando em segundo plano): \n")
+			fmt.Println()
+			fmt.Printf("	$ sudo systemctl stop %s.service \n", project_name)
+			fmt.Printf("	$ sudo systemctl disable %s.service \n", project_name)
+
+			os.Exit(0)
+		}
+	}
 
 	var path string = GetConfig("path")
 	var port string = GetConfig("port")
-	var root, err = filepath.Abs("/etc/aqueduct")
-	if err != nil {
-		LogFatal(err.Error())
-	}
 
-	fmt.Println(root)
 	if dir, err := os.Stat(path); err != nil {
 		LogInfo(fmt.Sprintf("PATH=%s", path))
 		LogFatal("O valor do paramêtro PATH definido no arquivo de configuração não existe ou o programa não tem acesso de leitura ao caminho.")
@@ -47,8 +68,8 @@ func main() {
 
 	// Handles CRUD
 	router.POST("/upload", HandleUpload)
-	router.POST("/delete", HandleDelete)
-	router.GET("/download/:folder", HandleDownload)
+	router.GET("/delete", HandleDelete)
+	router.GET("/download", HandleDownload)
 	// Note: For folder download
 
 	// Enable user sessions to delete data uploaded in session
@@ -57,4 +78,19 @@ func main() {
 	if err := router.Run(fmt.Sprintf(":%s", port)); err != nil {
 		LogFatal(err.Error())
 	}
+}
+
+func GetConfig(key string) (value string) {
+	if val := os.Getenv(key); val != "" {
+		return val
+	}
+
+	LogFatal(
+		fmt.Sprintf(
+			"Variavel de configuração (%s) necessária não encontrada.",
+			key,
+		),
+	)
+
+	return ""
 }
