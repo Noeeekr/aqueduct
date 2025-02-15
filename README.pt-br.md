@@ -1,5 +1,5 @@
 Translated to en:
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Noeeekr/aqueduct/blob/master/README.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Noeeekr/aqueduct/blob/master/readme.md)
 
 # Sobre
 Aqueduct é um servidor de transferência de arquivos de desktop de rede local para plataformas Linux construído com a linguagem de programação GOLANG.
