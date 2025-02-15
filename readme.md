@@ -1,4 +1,5 @@
-Manual
+Traduzido em PT-BR:
+[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/Noeeekr/aqueduct/blob/master/README.pt-br.md)
 
 # About
 Aqueduct is a local network desktop file transfer server for linux platforms built with GOLANG programming language.
