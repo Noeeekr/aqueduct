@@ -1,10 +1,10 @@
 Traduzido em PT-BR:
 [![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](https://github.com/Noeeekr/aqueduct/blob/master/README.pt-br.md)
 
-# About
-Aqueduct is a local network desktop file transfer server for linux platforms built with GOLANG programming language.
+# Description
+Aqueduct makes easy to transfer all types of files between desktops in the same network. It is currently being developed with GO programming language for linux operating systems.
 
-# Installing
+# Installation
 
 Clone the files in the build folder
 In the terminal, ensure that the install script has execution permissions
@@ -20,4 +20,4 @@ To see the path of the configuration file, run the installation script and type 
 $ aqueduct
 
 # Contribute
-Read the note extra.md for more information.
+Read contributing.md for more information.
