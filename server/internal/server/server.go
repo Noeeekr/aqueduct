@@ -54,6 +54,6 @@ func Start() error {
 	// Enable user sessions to delete data uploaded in session
 	router.POST("/cookie", handlers.HandleCookie)
 
-	fmt.Println("Starting server on port " + port)
+	instance.Logger.Info("Starting server on port " + port)
 	return router.Run(fmt.Sprintf(":%s", port))
 }

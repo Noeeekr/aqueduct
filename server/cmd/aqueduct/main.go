@@ -13,12 +13,14 @@ import (
 func main() {
 
 	var instance *internal.Instance = internal.NewInstance()
-
-	LogsFolder, err := os.Open(instance.Info.Logsfolder)
+	LogsFile, err := os.OpenFile(instance.Info.Logsfolder+"/output.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		LogsFolder = os.Stdout
+		instance.Logger.SetOutput(os.Stdout)
+		instance.Logger.Error("Using default log folder. Failed to set custom log folder: " + err.Error())
+	} else {
+		instance.Logger.SetOutput(LogsFile)
+		instance.Logger.Info("Using " + LogsFile.Name() + " as logs file")
 	}
-	instance.Logger.SetOutput(LogsFolder)
 
 	// Listen for sigterm signals | finishes program if finds one
 	sig := make(chan os.Signal, 1)

@@ -31,11 +31,12 @@ func (l *Logger) Info(message string) {
 		message = filename + ":" + strconv.Itoa(line) + " | " + message
 	}
 
+	message = "[INFO]" + message
 	fmt.Println(message)
 	l.logger.Println(message)
 }
 
-// Logs to stdout, the define log folder and returns the formated message in form of an error
+// Logs to stdout and the defined log folder and returns the formated message in form of an error
 func (l *Logger) Error(message string) error {
 	_, filename, line, ok := runtime.Caller(1)
 	if ok && program.Info.Environment == EnvironmentDevelopment {
