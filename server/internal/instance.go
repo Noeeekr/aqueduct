@@ -18,6 +18,5 @@ var program *Instance = &Instance{
 // New executes only one time and then returns the same Instance everytime.
 // On execution parses all flags and stores them
 func NewInstance() *Instance {
-
 	return program
 }

@@ -47,8 +47,8 @@ func NewInfo() *Info {
 		var environment string
 
 		flag.StringVar(&defaultInfo.SharedFolder, "public-folder", "", "sets the folder where files will be stored and shared")
-		flag.StringVar(&defaultInfo.Port, "port", "80", "sets the port the server will listen to. Default is 80")
-		flag.StringVar(&defaultInfo.Logsfolder, "logs", "", "Sets the folder where logs will be stored")
+		flag.StringVar(&defaultInfo.Port, "port", defaultInfo.Port, "sets the port the server will listen to. Default is 80")
+		flag.StringVar(&defaultInfo.Logsfolder, "logs", defaultInfo.Logsfolder, "Sets the folder where logs will be stored")
 		flag.StringVar(&environment, "environment", "", "Sets the environment the server will be using: development or production")
 		flag.Parse()
 
