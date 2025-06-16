@@ -6,10 +6,7 @@ Aqueduct makes easy to transfer all types of files between desktops in the same 
 
 # Installation
 
-Clone the files in the build folder
-In the terminal, ensure that the install script has execution permissions
-After that, navigate to the root of the project and type:
-
+$ git clone https://github.com/Noeeekr/aqueduct/
 $ sudo./install.sh
 
 # Configuration
